@@ -35,8 +35,8 @@ public class GameManager : MonoBehaviour
                 // get the width and height of the ad chosen
                 float adWidth = adRectTransform.rect.width;
                 float adHeight = adRectTransform.rect.height;
-                float randomX = UnityEngine.Random.Range(0, Screen.width - adWidth);
-                float randomY = UnityEngine.Random.Range(0, Screen.height - adHeight);
+                float randomX = UnityEngine.Random.Range(adWidth / 2, Screen.width - adWidth / 2);
+                float randomY = UnityEngine.Random.Range(adHeight / 2, Screen.height - adHeight / 2);
 
                 ad.transform.SetParent(GameObject.Find("Canvas").transform, false);
                 // set its recttransform position to a random position on the screen offset by width and height
