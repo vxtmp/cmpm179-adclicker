@@ -15,10 +15,40 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     public GameObject[] adPrefabs;
 
-    public int adsClosed = 0;
-    public int currentAds = 0;
+    [SerializeField]
+    public GameObject cpuUsageTextTag;
 
+    // make a list of the current ads
+    public List<GameObject> adPool = new List<GameObject>();
 
+    private int adsClosed = 0;
+    private int currentAds = 0;
+    private float cpuUsage = 0;
+
+    private float timeSinceLastSpawn = 0.0f;
+    private float adInterval = 5.0f; // seconds
+
+    
+
+    private  void recalculateCpuUsage()
+    {
+        // set cpuUsage = length of adPool * constant
+        cpuUsage = adPool.Count * 1.0f;
+        if (cpuUsage > 100.0f)
+        {
+            cpuUsage = 100.0f;
+        }
+        // cpuUsageTextTag is a TextMeshPro object. change the text inside it
+        cpuUsageTextTag.GetComponent<TMPro.TextMeshProUGUI>().text = "CPU Usage: " + cpuUsage + "%";
+        
+    }
+    private void checkCpuOverload()
+    {
+        if (cpuUsage >= 100)
+        {
+            Debug.Log("CPU Overload");
+        }
+    }
     public void spawnRandomAd()
     {
         // check if null, then choose a random ad and spawn a random ad. loop a random number of times between 1 and 4
@@ -29,27 +59,25 @@ public class GameManager : MonoBehaviour
             {
                 int randomIndex = UnityEngine.Random.Range(0, adPrefabs.Length);
                 GameObject ad = Instantiate(adPrefabs[randomIndex]);
+                adPool.Add(ad);
+                ad.transform.SetParent(GameObject.Find("Canvas").transform, false);
+
+                recalculateCpuUsage();
+                checkCpuOverload();
 
                 // parent the event to the canvas
                 RectTransform adRectTransform = ad.GetComponent<RectTransform>();
+                
                 // get the width and height of the ad chosen
                 float adWidth = adRectTransform.rect.width;
                 float adHeight = adRectTransform.rect.height;
                 float randomX = UnityEngine.Random.Range(adWidth / 2, Screen.width - adWidth / 2);
                 float randomY = UnityEngine.Random.Range(adHeight / 2, Screen.height - adHeight / 2);
-
-                ad.transform.SetParent(GameObject.Find("Canvas").transform, false);
-                // set its recttransform position to a random position on the screen offset by width and height
-
-                // log all values for debugging, adwidth, height, randomx and y
-                Debug.Log(adWidth);
-                Debug.Log(adHeight);
-                Debug.Log(randomX);
-                Debug.Log(randomY);
                 adRectTransform.position = new Vector3(randomX, randomY, 0);
-                Debug.Log(adRectTransform.position);
             }
         }
+
+        cpuUsageTextTag.transform.SetAsLastSibling();
     }
     private void Awake()
     {
@@ -75,6 +103,12 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        timeSinceLastSpawn += Time.deltaTime;
+        if (timeSinceLastSpawn >= adInterval)
+        {
+            timeSinceLastSpawn = 0.0f;
+            spawnRandomAd();
+        }
         
     }
 

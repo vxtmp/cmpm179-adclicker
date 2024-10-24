@@ -38,6 +38,10 @@ public class PopupScript : MonoBehaviour
         {
             Debug.LogError("Button 'x' not found");
         }
+        // add an on-click listener to the panel itself (this game object)
+        // gameObject.onClick.AddListener(OnCloseButtonClicked);
+
+
         // add an onclick listener to the panel itself
         // gameObject.GetComponent<Button>().onClick.AddListener(OnCloseButtonClicked);
     }
