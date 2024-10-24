@@ -26,6 +26,9 @@ public class PopupScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // set width and height
+        width = (int)gameObject.GetComponent<RectTransform>().rect.width;
+        height = (int)gameObject.GetComponent<RectTransform>().rect.height;
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(OnCloseButtonClicked);
