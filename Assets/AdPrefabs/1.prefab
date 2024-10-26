@@ -486,6 +486,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   closeButton: {fileID: 5226173525738646387}
+  adBodyButton: {fileID: 7417608129904581898}
   width: 0
   height: 0
 --- !u!1 &8138577189501553296
