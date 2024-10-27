@@ -70,6 +70,7 @@ public class PopupScript : MonoBehaviour
         
     }
 
+    // DEPRECATED. Using raycastClickFromMouseObject instead in GameManager
     private void OnCloseButtonClicked()
     {
         // display a debug log

@@ -23,8 +23,10 @@ public class GameManager : MonoBehaviour
     // make a list of the current ads
     public List<GameObject> adPool = new List<GameObject>();
 
-    private int adsClosed = 0;
-    private int currentAds = 0;
+    public bool spawningAdsFlag = true;
+
+    //private int adsClosed = 0;
+    //private int currentAds = 0;
     private float cpuUsage = 0;
     private const float CPU_USAGE_PER_AD = 5.0f;
 
@@ -130,6 +132,61 @@ public class GameManager : MonoBehaviour
         foreach (UnityEngine.EventSystems.RaycastResult result in results)
         {
             Debug.Log("Hit " + result.gameObject.name);
+            if (ITManager.Instance.receivingPlayerInput() == true)
+            {
+                switch (result.gameObject.name)
+                {
+                    case "Phone_Button_1":
+                        ITManager.Instance.receivePlayerInput('1');
+                        break;
+                    case "Phone_Button_2":
+                        ITManager.Instance.receivePlayerInput('2');
+                        break;
+                    case "Phone_Button_3":
+                        ITManager.Instance.receivePlayerInput('3');
+                        break;
+                    case "Phone_Button_4":
+                        ITManager.Instance.receivePlayerInput('4');
+                        break;
+                    case "Phone_Button_5":
+                        ITManager.Instance.receivePlayerInput('5');
+                        break;
+                    case "Phone_Button_6":
+                        ITManager.Instance.receivePlayerInput('6');
+                        break;
+                    case "Phone_Button_7":
+                        ITManager.Instance.receivePlayerInput('7');
+                        break;
+                    case "Phone_Button_8":
+                        ITManager.Instance.receivePlayerInput('8');
+                        break;
+                    case "Phone_Button_9":
+                        ITManager.Instance.receivePlayerInput('9');
+                        break;
+                    case "Phone_Button_0":
+                        ITManager.Instance.receivePlayerInput('0');
+                        break;
+                    case "Phone_Button_Pound":
+                        ITManager.Instance.receivePlayerInput('#');
+                        break;
+
+                }
+            }
+            if (result.gameObject.name == "ITSupportButton")
+            {
+                Debug.Log("ITSupportButton clicked");
+                // trigger the ITSupportButton event
+                //ITSupportButton?.Invoke();
+                spawningAdsFlag = false;
+                if (ITManager.Instance.isITSceneActive == false)
+                {
+                    ITManager.Instance.isITSceneActive = true;
+                    nukeAds();
+                    ITManager.Instance.startITScene();
+                }
+                break;
+            }
+            else
             if (result.gameObject.name == "AdBodyButton")
             {
                 Debug.Log("AdBodyButton clicked");
@@ -197,6 +254,17 @@ public class GameManager : MonoBehaviour
             mouseCursor.transform.position = new Vector2(front.x + 5, front.y - 8);
         }
     }
+
+    public void nukeAds()
+    {
+        foreach (GameObject ad in adPool)
+        {
+            Destroy(ad);
+        }
+        adPool.Clear();
+        //recalculateCpuUsage();
+    }
+
 
     public void TriggerAdClosed()
     {
