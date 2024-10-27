@@ -51,6 +51,10 @@ public class GameManager : MonoBehaviour
         {
             cpuUsage = 100.0f;
         }
+        if (ITManager.Instance.isITSceneActive)
+        {
+            cpuUsage += 20.0f;
+        }
         // cpuUsageTextTag is a TextMeshPro object. change the text inside it
         cpuUsageTextTag.GetComponent<TMPro.TextMeshProUGUI>().text = "CPU Usage: " + cpuUsage + "%";
 
@@ -70,6 +74,7 @@ public class GameManager : MonoBehaviour
     private void setRenderPriorityCanvasObjects()
     {
         cpuUsageTextTag.transform.SetAsLastSibling();
+        ITManager.Instance.ITPhoneObject.transform.SetAsLastSibling();
         mouseCursor.transform.SetAsLastSibling();
     }
 
@@ -177,12 +182,13 @@ public class GameManager : MonoBehaviour
                 Debug.Log("ITSupportButton clicked");
                 // trigger the ITSupportButton event
                 //ITSupportButton?.Invoke();
-                spawningAdsFlag = false;
+                //spawningAdsFlag = false;
                 if (ITManager.Instance.isITSceneActive == false)
                 {
                     ITManager.Instance.isITSceneActive = true;
                     nukeAds();
                     ITManager.Instance.startITScene();
+                    recalculateCpuUsage();
                 }
                 break;
             }
@@ -274,6 +280,7 @@ public class GameManager : MonoBehaviour
 
     public void spawnRandomAd()
     {
+        if (spawningAdsFlag == false) return;
         // check if null, then choose a random ad and spawn a random ad. loop a random number of times between 1 and 4
         if (adPrefabs != null)
         {

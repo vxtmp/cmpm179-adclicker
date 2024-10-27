@@ -40,7 +40,7 @@ public class ITManager : MonoBehaviour
     }
 
     [SerializeField]
-    private GameObject ITPhoneObject;
+    public GameObject ITPhoneObject;
     [SerializeField]
     private GameObject dialogueBoxTextTag;
     private bool displayingALine = false;
@@ -78,6 +78,7 @@ public class ITManager : MonoBehaviour
         {
             yield return StartCoroutine(coroutineDisplayLine(miss_messages[failedAttempts]));
             failedAttempts++;
+            yield return StartCoroutine(replayNumberSequence());
         }
         else
         {
@@ -181,7 +182,7 @@ public class ITManager : MonoBehaviour
 
     private Dialogue[] loss_messages = new Dialogue[]
     {
-        new Dialogue("No! FUCK. Why would you press that there!?", 1.0f), // hang up dialogue pt1
+        new Dialogue("No! FUCK. How many times do I have to repeat myself!?", 1.0f), // hang up dialogue pt1
         new Dialogue("You know what? ", 1.0f), // pt2
         new Dialogue("I'm done.", 0.7f),
         new Dialogue("You have a nice day. *clack* ", 2.0f),
