@@ -26,21 +26,20 @@ public class GameManager : MonoBehaviour
     private int adsClosed = 0;
     private int currentAds = 0;
     private float cpuUsage = 0;
-    private const float CPU_USAGE_PER_AD = 1.0f;
+    private const float CPU_USAGE_PER_AD = 5.0f;
 
     private int queueLengthBasedOnCPU = 0;
 
     private float timeSinceLastSpawn = 0.0f;
-    private float adInterval = 5.0f; // seconds
+    private float adInterval = 3.0f; // seconds
+    private const float AD_INTERVAL_DECREMENT_PENALTY = 0.5f;
+    private const float MINIMUM_AD_INTERVAL = 1.0f;
 
     private float timeSinceLastCursorUpdate = 0.0f;
-    private const float mouseTickRate = 0.0167f; // 60 fps
+    private const float mouseTickRate = 0.0333f; // 30 fps
 
     // create a queue of vector2 points storing the cursor location
     private Queue<Vector2> cursorLocQueue = new Queue<Vector2>();
-
-
-    
 
     private  void recalculateCpuUsage()
     {
@@ -55,7 +54,7 @@ public class GameManager : MonoBehaviour
 
         // set queueLengthBasedOnCPU = cpuUsage / 10
         queueLengthBasedOnCPU = (int)(cpuUsage / 10);
-        Debug.Log("queueLengthBasedOnCPU: " + queueLengthBasedOnCPU);
+        //Debug.Log("queueLengthBasedOnCPU: " + queueLengthBasedOnCPU);
         
     }
     private void checkCpuOverload()
@@ -68,42 +67,10 @@ public class GameManager : MonoBehaviour
 
     private void setRenderPriorityCanvasObjects()
     {
-
         cpuUsageTextTag.transform.SetAsLastSibling();
         mouseCursor.transform.SetAsLastSibling();
     }
 
-    public void spawnRandomAd()
-    {
-        // check if null, then choose a random ad and spawn a random ad. loop a random number of times between 1 and 4
-        if (adPrefabs != null)
-        {
-            int numAds = UnityEngine.Random.Range(1, 2) + UnityEngine.Random.Range(1, 2) - 1;
-            Debug.Log("tried to spawn: " + numAds + " ads");
-            for (int i = 0; i < numAds; i++)
-            {
-                int randomIndex = UnityEngine.Random.Range(0, adPrefabs.Length);
-                GameObject ad = Instantiate(adPrefabs[randomIndex]);
-                adPool.Add(ad);
-                ad.transform.SetParent(GameObject.Find("Canvas").transform, false);
-
-                recalculateCpuUsage();
-                checkCpuOverload();
-
-                // parent the event to the canvas
-                RectTransform adRectTransform = ad.GetComponent<RectTransform>();
-                
-                // get the width and height of the ad chosen
-                float adWidth = adRectTransform.rect.width;
-                float adHeight = adRectTransform.rect.height;
-                float randomX = UnityEngine.Random.Range(adWidth / 2, Screen.width - adWidth / 2);
-                float randomY = UnityEngine.Random.Range(adHeight / 2, Screen.height - adHeight / 2);
-                adRectTransform.position = new Vector3(randomX, randomY, 0);
-            }
-        }
-        setRenderPriorityCanvasObjects();
-
-    }
     private void Awake()
     {
         // Check if an instance already exists
@@ -151,6 +118,40 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public void raycastClickFromMouseObject()
+    {
+        Debug.Log("clicked");
+        // use graphic raycaster to get the object underneath the mouseCursor object
+        UnityEngine.EventSystems.PointerEventData pointerData = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current);
+        pointerData.position = new Vector2 (mouseCursor.transform.position.x - 5, mouseCursor.transform.position.y + 8);
+                                            // offset by sprite position
+        List<UnityEngine.EventSystems.RaycastResult> results = new List<UnityEngine.EventSystems.RaycastResult>();
+        UnityEngine.EventSystems.EventSystem.current.RaycastAll(pointerData, results);
+        foreach (UnityEngine.EventSystems.RaycastResult result in results)
+        {
+            Debug.Log("Hit " + result.gameObject.name);
+            if (result.gameObject.name == "AdBodyButton")
+            {
+                Debug.Log("AdBodyButton clicked");
+                adInterval -= AD_INTERVAL_DECREMENT_PENALTY;
+                if (adInterval < MINIMUM_AD_INTERVAL)
+                {
+                    adInterval = MINIMUM_AD_INTERVAL;
+                }
+                Debug.Log("adInterval now: " + adInterval);
+                break;
+            }
+            else if (result.gameObject.name == "X")
+            {
+                Debug.Log("X clicked");
+                // remove the ad from the adPool
+                adPool.Remove(result.gameObject.transform.parent.gameObject);
+                Destroy(result.gameObject.transform.parent.gameObject);
+                recalculateCpuUsage();
+                break;
+            }
+        }
+    }
     // Update is called once per frame
     void Update()
     {
@@ -159,7 +160,7 @@ public class GameManager : MonoBehaviour
         {
             timeSinceLastSpawn = 0.0f;
             // set adInterval to a random number between 2 and 5
-            adInterval = UnityEngine.Random.Range(2.0f, 5.0f);
+            //adInterval = UnityEngine.Random.Range(2.0f, 5.0f);
             spawnRandomAd();
         }
         
@@ -169,7 +170,13 @@ public class GameManager : MonoBehaviour
             timeSinceLastCursorUpdate = 0.0f;
             updCursorLoc();
         }
-        
+
+        // Check for a global left mouse click
+        if (Input.GetMouseButtonDown(0))
+        {
+            raycastClickFromMouseObject();  
+        }
+
     }
 
     void updCursorLoc()
@@ -177,20 +184,17 @@ public class GameManager : MonoBehaviour
         //// push current mouseloc to the queue
         Vector2 mouseLoc = Input.mousePosition;
 
-        Debug.Log("mouseLoc: " + mouseLoc);
+        //Debug.Log("mouseLoc: " + mouseLoc);
 
         cursorLocQueue.Enqueue(mouseLoc);
-
 
         // if the queue is longer than queueLengthBasedOnCPU, pop the front of the queue
         if (cursorLocQueue.Count > queueLengthBasedOnCPU)
         {
             // set mouseCursor canvas object's rect position to the front of the queue
             Vector2 front = cursorLocQueue.Dequeue();
-            Debug.Log ("dequeued front: " + front); 
-            mouseCursor.transform.position = front;
-
-
+            //Debug.Log ("dequeued front: " + front); 
+            mouseCursor.transform.position = new Vector2(front.x + 5, front.y - 8);
         }
     }
 
@@ -198,6 +202,38 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("TriggerAdClosed");
         AdClosed?.Invoke();
+    }
+
+    public void spawnRandomAd()
+    {
+        // check if null, then choose a random ad and spawn a random ad. loop a random number of times between 1 and 4
+        if (adPrefabs != null)
+        {
+            int numAds = UnityEngine.Random.Range(1, 3);
+            //Debug.Log("tried to spawn: " + numAds + " ads");
+            for (int i = 0; i < numAds; i++)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, adPrefabs.Length);
+                GameObject ad = Instantiate(adPrefabs[randomIndex]);
+                adPool.Add(ad);
+                ad.transform.SetParent(GameObject.Find("Canvas").transform, false);
+
+                recalculateCpuUsage();
+                checkCpuOverload();
+
+                // parent the event to the canvas
+                RectTransform adRectTransform = ad.GetComponent<RectTransform>();
+
+                // get the width and height of the ad chosen
+                float adWidth = adRectTransform.rect.width;
+                float adHeight = adRectTransform.rect.height;
+                float randomX = UnityEngine.Random.Range(adWidth / 2, Screen.width - adWidth / 2);
+                float randomY = UnityEngine.Random.Range(adHeight / 2, Screen.height - adHeight / 2);
+                adRectTransform.position = new Vector3(randomX, randomY, 0);
+            }
+        }
+        setRenderPriorityCanvasObjects();
+
     }
 
 }

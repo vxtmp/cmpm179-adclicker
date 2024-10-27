@@ -73,14 +73,14 @@ public class PopupScript : MonoBehaviour
     private void OnCloseButtonClicked()
     {
         // display a debug log
-        Debug.Log("Close button clicked");
-        Destroy(gameObject);
-        // trigger the gamemanager event
-        GameManager.Instance.TriggerAdClosed();
+        Debug.Log("actual mouse click of close button");
+        //Destroy(gameObject);
+        //// trigger the gamemanager event
+        //GameManager.Instance.TriggerAdClosed();
     }
 
     private void OnAdBodyButtonClicked()
     {
-        Debug.Log("Ad body clicked");
+        Debug.Log("actual mouse click of ad body");
     }
 }
