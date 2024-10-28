@@ -6,6 +6,11 @@ using UnityEngine;
 public class ITManager : MonoBehaviour
 {
     public bool isITSceneActive = false;
+
+    [SerializeField]
+    private GameObject WinScreen;
+    [SerializeField]
+    private GameObject LoseScreen;
     // Singleton instance
     public static ITManager Instance { get; private set; }
     private void Awake()
@@ -60,16 +65,23 @@ public class ITManager : MonoBehaviour
     private void runGameOver()
     {
         Debug.Log("GAME OVER");
-        StartCoroutine(coroutineDisplayLoop(success_message));
+        
         // switch to game over scene.
     }
-
-    private void runVictory()
+    private IEnumerator triggerVictoryScreen()
     {
-        Debug.Log("VICTORY");
-        // switch to scene and run bsod sequence.
-    }
+        yield return StartCoroutine(coroutineDisplayLoop(success_message));
+        // wait a few seconds, then display a win screen.
+        yield return new WaitForSeconds(3);
+        GameManager.Instance.nukeAds();
+        GameManager.Instance.spawningAdsFlag = false;
+        WinScreen.SetActive(true);
+        // set winscreen as last sibling
+        WinScreen.transform.SetAsLastSibling();
+        yield return new WaitForSeconds(5);
+        GameManager.Instance.exitGame();
 
+    }
     private IEnumerator failedAttempt()
     {
         receivingPlayerInputFlag = false;
@@ -83,7 +95,15 @@ public class ITManager : MonoBehaviour
         else
         {
             yield return StartCoroutine(coroutineDisplayLoop(loss_messages));
-            runGameOver();    
+            Debug.Log("GAME OVER");
+            yield return new WaitForSeconds(5);
+            GameManager.Instance.nukeAds();
+            GameManager.Instance.spawningAdsFlag = false;
+            LoseScreen.SetActive(true);
+            // set winscreen as last sibling
+            LoseScreen.transform.SetAsLastSibling();
+            yield return new WaitForSeconds(5);
+            GameManager.Instance.exitGame();
         }
     }
 
@@ -91,7 +111,8 @@ public class ITManager : MonoBehaviour
     {
         if (receivedPlayerInput == ANSWER_SEQUENCE)
         {
-            runVictory();
+            StartCoroutine(triggerVictoryScreen());
+            return;
         }
         // for current length of receivedPlayerInput, check each char against the corresponding char in answer
         for (int i = 0; i < receivedPlayerInput.Length; i++)

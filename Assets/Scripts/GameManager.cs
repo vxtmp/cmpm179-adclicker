@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     public GameObject[] adPrefabs;
 
     [SerializeField]
-    private GameObject cpuUsageTextTag;
+    private GameObject cpuUsageTextTag;  
     [SerializeField]
     private GameObject mouseCursor;
 
@@ -92,7 +92,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void exitGame()
+    public void exitGame()
     {
         #if UNITY_EDITOR
                 UnityEditor.EditorApplication.isPlaying = false;
