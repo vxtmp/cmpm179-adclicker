@@ -48,7 +48,7 @@ public class ITManager : MonoBehaviour
     public GameObject ITPhoneObject;
     [SerializeField]
     private GameObject dialogueBoxTextTag;
-    private bool displayingALine = false;
+    //private bool displayingALine = false;
 
     private bool receivingPlayerInputFlag = false;
 
@@ -141,10 +141,6 @@ public class ITManager : MonoBehaviour
             failedAttempts++;
             receivedPlayerInput = "";
             StartCoroutine(replayNumberSequence());
-        } else if (input == null)
-        {
-            Debug.Log("player input null received.");
-            return;
         } else
         {
             receivedPlayerInput += input;
@@ -233,7 +229,7 @@ public class ITManager : MonoBehaviour
 
     private IEnumerator coroutineDisplayLine(Dialogue line)
     {
-        displayingALine = true;
+        //displayingALine = true;
         string tmp = "";
 
         for (int i = 0; i < line.sentence.Length; i++)
@@ -244,7 +240,7 @@ public class ITManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(line.extra_duration);
-        displayingALine = false;
+        //displayingALine = false;
     }
     public IEnumerator coroutineDisplayLoop(Dialogue[] dialogueSet)
     {

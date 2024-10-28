@@ -119,7 +119,7 @@ public class GameManager : MonoBehaviour
         if (mouseCursor == null)
         {
             Debug.LogError("Mouse Cursor not found");
-            UnityEditor.EditorApplication.isPlaying = false;
+            //UnityEditor.EditorApplication.isPlaying = false;
             exitGame();
         }
 
